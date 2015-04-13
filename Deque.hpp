@@ -351,6 +351,10 @@ namespace NDeque
         {
             return std::reverse_iterator<constIterator>(begin());
         }
+        ~Deque()
+        {
+            delete[] buffer;
+        }
     };
 };
 #endif
