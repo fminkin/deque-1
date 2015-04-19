@@ -151,7 +151,7 @@ namespace NDeque
             
             bool operator>(const baseIterator &it) const 
             {
-                return (it > *this);
+                return (it < *this);
             }
             
             bool operator<=(const baseIterator &it) const 
