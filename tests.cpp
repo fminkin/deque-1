@@ -10,6 +10,11 @@ std::default_random_engine generator;
 
 using std::deque;
 using NDeque::Deque;
+#ifdef MAXIMIZE_SIZE
+    const int COEFFICIENT = 2;
+#else
+    const int COEFFICIENT = 0;
+#endif
 
 enum EQueries
 {
@@ -73,18 +78,28 @@ TEST_P(DequeFunctionalityTest, EveryPossibleTest)
     
     clock_t start = clock();
     
-    std::uniform_int_distribution<int> queryGetter(0, NUMBER_OF_QUERY_TYPES - 1);
+    size_t maxSize = 0;
+    
+    std::uniform_int_distribution<int> queryGetter(0, NUMBER_OF_QUERY_TYPES - 1 + COEFFICIENT);
     generator.seed(1);
     Deque<int> my;
     deque<int> stls;
     ASSERT_EQ(my.size(), stls.size());
+    ASSERT_EQ(my.empty(), stls.empty());
+    
     size_t queries = GetParam();
     for (size_t i = 0; i < queries; ++i)
     {
-        EQueries query = static_cast<EQueries> (queryGetter(generator));
+        int indexOfQuery = queryGetter(generator);
+        if (indexOfQuery >= NUMBER_OF_QUERY_TYPES)
+        {
+            indexOfQuery = (indexOfQuery - NUMBER_OF_QUERY_TYPES > COEFFICIENT / 2 ? PUSH_BACK : PUSH_FRONT);
+        }
+        EQueries query = static_cast<EQueries> (indexOfQuery);
+        
         int value;
         std::pair<size_t, size_t> leftRight;
-        switch (query)
+        switch (query)  
         {
             case PUSH_BACK:
                 value = generator();
@@ -150,19 +165,30 @@ TEST_P(DequeFunctionalityTest, EveryPossibleTest)
                 {
                     leftRight = chooseSubsegment(my.size());
                     ASSERT_EQ(static_cast<int>(std::equal(my.crbegin() + leftRight.first, my.crbegin() + leftRight.second + 1, stls.crbegin() + leftRight.first)) + i - 1, i);
+                    for (size_t j = 0; j < my.size(); ++j)
+                    {
+                        ASSERT_EQ(my[j], stls[j]);
+                    }
                     operationsCount += (leftRight.second - leftRight.first + 1);
                 }
             break;
         }
         ASSERT_EQ(my.size(), stls.size());
-        
+        ASSERT_EQ(my.empty(), stls.empty());
+        maxSize = std::max(maxSize, my.size());
     }
-    ASSERT_TRUE(std::equal(my.crbegin(), my.crend(), stls.crbegin()));
+    ASSERT_TRUE(std::equal(my.crbegin(), my.crend(), stls.crbegin()));    
+    for (size_t j = 0; j < my.size(); ++j)
+    {
+        ASSERT_EQ(my[j], stls[j]);
+    }
     operationsCount += (my.size());
-    fprintf(timeLog, "%lf; %lf\n", operationsCount, static_cast<double>(clock() - start) / CLOCKS_PER_SEC);
+    fprintf(timeLog, "%lf, %lf\n", operationsCount, static_cast<double>(clock() - start) / CLOCKS_PER_SEC);
+    fprintf(stderr, "%zu\n", maxSize);
     fclose(timeLog);
 }
 
+#ifndef MAXIMIZE_SIZE
 
 INSTANTIATE_TEST_CASE_P(InstantiationName, DequeFunctionalityTest, ::testing::Values(
                                                                           1, 2, 3, 4, 5, 6, 7, 9,
@@ -173,6 +199,22 @@ INSTANTIATE_TEST_CASE_P(InstantiationName, DequeFunctionalityTest, ::testing::Va
                                                                           100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000
     )
 );
+
+
+#else
+INSTANTIATE_TEST_CASE_P(InstantiationName, DequeFunctionalityTest, ::testing::Values(
+                                                                          1, 2, 3, 4, 5, 6, 7, 9,
+                                                                          10, 20, 30, 40, 60, 70, 80, 90,
+                                                                          100, 200, 300, 400, 500, 700, 800, 900,
+                                                                          1000, 2000, 3000, 5000, 6000, 7000, 8000, 9000,
+                                                                          10000,
+                                                                          100000,
+                                                                          1000000
+    )
+);
+#endif
+
+
 
 int main(int argc, char *argv[])
 {
