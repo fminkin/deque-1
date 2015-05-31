@@ -1,2 +1,2 @@
 # deque
-![alt text](https://github.com/thefacetakt/deque/blob/master/timeGraph.png "time graph")
+![alt text](https://github.com/thefacetakt/deque/blob/master2/timeGraph.png "time graph")
