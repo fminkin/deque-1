@@ -16,7 +16,7 @@ namespace NDeque
         size_t _begin;
         size_t _end;
         
-        void reallocMore()
+        void reallocateMore()
         {
             if (size() == sizeOfBuffer - 1)
             {
@@ -33,7 +33,7 @@ namespace NDeque
             }
         }
         
-        void reallocLess()
+        void reallocateLess()
         {
             if (size() == sizeOfBuffer / 4 && sizeOfBuffer > 4)
             {
@@ -55,7 +55,7 @@ namespace NDeque
         
 
         
-        template<class _T> //_T = const T if constIterator
+        template<class _T> //_T = const T if const_iterator
         class baseIterator : public std::iterator<std::random_access_iterator_tag, T, ptrdiff_t, _T*, _T&>
         {
             typedef typename std::iterator<std::random_access_iterator_tag, T, ptrdiff_t, _T*, _T&>::difference_type differenceType;
@@ -99,7 +99,7 @@ namespace NDeque
             baseIterator operator++(int)
             {
                 baseIterator tmp(*this);
-                operator++(index);
+                operator++();
                 return tmp;
             }
             
@@ -211,7 +211,7 @@ namespace NDeque
 
     public:
         typedef baseIterator<T> iterator;
-        typedef baseIterator<const T> constIterator;
+        typedef baseIterator<const T> const_iterator;
         Deque()
         {
             sizeOfBuffer = 2;
@@ -256,14 +256,14 @@ namespace NDeque
         
         void pushBack(T x)
         {
-            reallocMore();
+            reallocateMore();
             buffer[_end] = x;
             _end = (_end + 1) & (sizeOfBuffer - 1);
         }
         
         void pushFront(T x)
         {
-            reallocMore();
+            reallocateMore();
             _begin = (_begin - 1 + sizeOfBuffer) & (sizeOfBuffer - 1);
             buffer[_begin] = x;
         }
@@ -271,14 +271,14 @@ namespace NDeque
         void popBack()
         {
             assert(_begin != _end);
-            reallocLess();
+            reallocateLess();
             _end = (_end - 1 + sizeOfBuffer) & (sizeOfBuffer - 1);
         }
         
         void popFront()
         {
             assert(_begin != _end);
-            reallocLess();
+            reallocateLess();
             _begin = (_begin + 1) & (sizeOfBuffer - 1);
         }
         
@@ -302,22 +302,22 @@ namespace NDeque
             return iterator(_end, this);
         }
         
-        constIterator cbegin() 
+        const_iterator cbegin() 
         {
-            return constIterator(_begin, this);
+            return const_iterator(_begin, this);
         }
         
-        constIterator cend()
+        const_iterator cend()
         {
-            return constIterator(_end, this);
+            return const_iterator(_end, this);
         }
         
-        constIterator begin() const
+        const_iterator begin() const
         {
             return cbegin();
         }
         
-        constIterator end() const
+        const_iterator end() const
         {
             return cend();
         }
@@ -332,24 +332,24 @@ namespace NDeque
             return std::reverse_iterator<iterator>(begin());
         }
         
-        std::reverse_iterator<constIterator> crbegin() 
+        std::reverse_iterator<const_iterator> crbegin() 
         {
-            return std::reverse_iterator<constIterator>(cend());
+            return std::reverse_iterator<const_iterator>(cend());
         }
         
-        std::reverse_iterator<constIterator> crend() 
+        std::reverse_iterator<const_iterator> crend() 
         {
-            return std::reverse_iterator<constIterator>(cbegin());
+            return std::reverse_iterator<const_iterator>(cbegin());
         }
         
-        std::reverse_iterator<constIterator> rbegin() const
+        std::reverse_iterator<const_iterator> rbegin() const
         {
-            return std::reverse_iterator<constIterator>(end());
+            return std::reverse_iterator<const_iterator>(end());
         }
         
-        std::reverse_iterator<constIterator> rend() const
+        std::reverse_iterator<const_iterator> rend() const
         {
-            return std::reverse_iterator<constIterator>(begin());
+            return std::reverse_iterator<const_iterator>(begin());
         }
         ~Deque()
         {
